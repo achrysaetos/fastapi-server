@@ -1,101 +1,83 @@
-from fastapi import FastAPI, Request, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
-import logging
-import uvicorn
+import os
+from fastapi import FastAPI, HTTPException
+from groq import Groq
+from dotenv import load_dotenv
+from .models import ChatRequest, ChatResponse
 
-from .config import settings
-from .routers import groq
+# Load environment variables
+load_dotenv()
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+# Initialize Groq client
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-# Validate configuration on startup
-try:
-    settings.validate_config()
-    logger.info("Configuration validated successfully")
-except ValueError as e:
-    logger.error(f"Configuration validation failed: {e}")
-    raise
-
-# Create FastAPI application
+# Create FastAPI app
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    description="FastAPI application with Groq integration",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
-)
-
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    title="FastAPI Groq Integration",
+    description="Simple FastAPI app to query Groq models",
+    version="1.0.0"
 )
 
 
-# Custom exception handlers
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """Handle request validation errors."""
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "error": "Validation error",
-            "detail": exc.errors()
-        }
-    )
-
-
-@app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
-    """Handle general exceptions."""
-    logger.error(f"Unhandled exception: {str(exc)}")
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "error": "Internal server error",
-            "detail": "An unexpected error occurred"
-        }
-    )
-
-
-# Include routers
-app.include_router(groq.router, prefix=settings.API_V1_STR)
-
-
-# Root endpoint
 @app.get("/")
 async def root():
-    """Root endpoint with API information."""
+    """Root endpoint."""
     return {
         "message": "FastAPI Groq Integration",
-        "version": "1.0.0",
         "docs": "/docs",
-        "health": f"{settings.API_V1_STR}/groq/health"
+        "chat_endpoint": "/chat"
     }
 
 
-# Health check endpoint
-@app.get("/health")
-async def health():
-    """General health check endpoint."""
-    return {"status": "healthy", "application": settings.PROJECT_NAME}
+@app.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    """
+    Chat with Groq models.
+    
+    Send a message and get an AI response using Groq's language models.
+    """
+    try:
+        # Prepare messages
+        messages = []
+        
+        if request.system_prompt:
+            messages.append({"role": "system", "content": request.system_prompt})
+        
+        messages.append({"role": "user", "content": request.message})
+        
+        # Call Groq API
+        response = groq_client.chat.completions.create(
+            model=request.model,
+            messages=messages,
+            max_tokens=request.max_tokens,
+            temperature=request.temperature
+        )
+        
+        # Return response
+        return ChatResponse(
+            content=response.choices[0].message.content,
+            model=request.model,
+            usage={
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@app.get("/models")
+async def get_models():
+    """Get available Groq models."""
+    return [
+        "llama-3.1-8b-instant",
+        "llama-3.1-70b-versatile", 
+        "mixtral-8x7b-32768",
+        "gemma2-9b-it"
+    ]
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    ) 
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True) 

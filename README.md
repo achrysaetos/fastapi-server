@@ -1,39 +1,27 @@
 # FastAPI Groq Integration
 
-A production-ready FastAPI application that provides endpoints to interact with Groq's language models.
+A simple, clean FastAPI application to query Groq's language models.
 
 ## Features
 
-- 🚀 **FastAPI** with automatic API documentation
-- 🤖 **Groq Integration** for AI text generation
-- 📝 **Pydantic Models** for request/response validation
-- 🔧 **Environment Configuration** management
-- 📊 **Structured Logging** with proper error handling
-- 🌐 **CORS** support for web applications
-- 🏥 **Health Checks** for monitoring
-- 🔒 **Input Validation** and sanitization
+- 🚀 Simple FastAPI app with auto-generated docs
+- 🤖 Direct Groq API integration
+- 📝 Clean request/response models
+- 🔧 Environment-based configuration
 
 ## Project Structure
 
 ```
 fastapi-server/
 ├── app/
-│   ├── __init__.py
-│   ├── main.py              # FastAPI application entry point
-│   ├── config.py            # Configuration management
-│   ├── models.py            # Pydantic models
-│   ├── routers/
-│   │   ├── __init__.py
-│   │   └── groq.py          # Groq API routes
-│   └── services/
-│       ├── __init__.py
-│       └── groq_service.py  # Groq service logic
-├── requirements.txt         # Python dependencies
-├── env.example             # Environment variables example
+│   ├── main.py      # Main FastAPI application
+│   └── models.py    # Request/response models
+├── requirements.txt # Dependencies
+├── env.example     # Environment template
 └── README.md
 ```
 
-## Setup
+## Quick Start
 
 ### 1. Install Dependencies
 
@@ -41,52 +29,38 @@ fastapi-server/
 pip install -r requirements.txt
 ```
 
-### 2. Environment Configuration
-
-Create a `.env` file in the root directory:
+### 2. Set up Environment
 
 ```bash
 cp env.example .env
 ```
 
 Edit `.env` and add your Groq API key:
-
 ```env
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-To get a Groq API key:
-1. Visit [Groq Console](https://console.groq.com/)
-2. Sign up or log in
-3. Generate an API key
+Get your API key at [Groq Console](https://console.groq.com/)
 
-### 3. Run the Application
+### 3. Run the Server
 
 ```bash
-# Development mode with auto-reload
-python -m app.main
-
-# Or using uvicorn directly
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-The API will be available at:
-- **API**: http://localhost:8000
-- **Interactive Docs**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+Visit http://localhost:8000/docs for the interactive API documentation.
 
 ## API Endpoints
 
-### Chat Completion
+### POST `/chat`
 
-Generate text using Groq's language models.
+Send a message to Groq and get an AI response.
 
-**POST** `/api/v1/groq/chat`
-
+**Request:**
 ```json
 {
   "message": "Hello, how are you?",
-  "model": "mixtral-8x7b-32768",
+  "model": "llama-3.1-8b-instant",
   "max_tokens": 1024,
   "temperature": 0.7,
   "system_prompt": "You are a helpful assistant."
@@ -97,159 +71,58 @@ Generate text using Groq's language models.
 ```json
 {
   "content": "Hello! I'm doing well, thank you for asking...",
-  "model": "mixtral-8x7b-32768",
+  "model": "llama-3.1-8b-instant",
   "usage": {
     "prompt_tokens": 15,
     "completion_tokens": 25,
     "total_tokens": 40
-  },
-  "finish_reason": "stop"
+  }
 }
 ```
 
-### Available Models
+### GET `/models`
 
 Get list of available Groq models.
-
-**GET** `/api/v1/groq/models`
 
 **Response:**
 ```json
 [
+  "llama-3.1-8b-instant",
+  "llama-3.1-70b-versatile",
   "mixtral-8x7b-32768",
-  "llama2-70b-4096",
-  "gemma-7b-it",
-  "llama3-70b-8192",
-  "llama3-8b-8192"
+  "gemma2-9b-it"
 ]
-```
-
-### Health Check
-
-Check service health.
-
-**GET** `/api/v1/groq/health`
-
-**Response:**
-```json
-{
-  "status": "healthy",
-  "service": "groq"
-}
 ```
 
 ## Usage Examples
 
-### Python Requests
-
+### Python
 ```python
 import requests
 
-# Chat completion
 response = requests.post(
-    "http://localhost:8000/api/v1/groq/chat",
-    json={
-        "message": "Explain quantum computing in simple terms",
-        "model": "mixtral-8x7b-32768",
-        "max_tokens": 500,
-        "temperature": 0.7
-    }
+    "http://localhost:8000/chat",
+    json={"message": "Explain Python in one sentence"}
 )
-
-result = response.json()
-print(result["content"])
+print(response.json()["content"])
 ```
 
 ### cURL
-
 ```bash
-curl -X POST "http://localhost:8000/api/v1/groq/chat" \
+curl -X POST "http://localhost:8000/chat" \
   -H "Content-Type: application/json" \
-  -d '{
-    "message": "Write a haiku about coding",
-    "model": "mixtral-8x7b-32768",
-    "max_tokens": 100,
-    "temperature": 0.8
-  }'
+  -d '{"message": "Write a haiku about coding"}'
 ```
 
-### JavaScript/Fetch
-
+### JavaScript
 ```javascript
-const response = await fetch('http://localhost:8000/api/v1/groq/chat', {
+const response = await fetch('http://localhost:8000/chat', {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    message: 'What is machine learning?',
-    model: 'mixtral-8x7b-32768',
-    max_tokens: 300,
-    temperature: 0.7
-  })
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ message: 'What is FastAPI?' })
 });
-
 const result = await response.json();
 console.log(result.content);
 ```
 
-## Configuration
-
-The application supports the following environment variables:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `GROQ_API_KEY` | Your Groq API key | **Required** |
-
-## Error Handling
-
-The API provides structured error responses:
-
-```json
-{
-  "error": "Error type",
-  "detail": "Detailed error message"
-}
-```
-
-Common HTTP status codes:
-- `200`: Success
-- `400`: Bad request (invalid input)
-- `422`: Validation error
-- `500`: Internal server error
-
-## Development
-
-### Code Structure Best Practices
-
-- **Separation of Concerns**: Models, services, and routes are separated
-- **Dependency Injection**: Services are injected into routes
-- **Error Handling**: Comprehensive error handling with logging
-- **Validation**: Pydantic models for request/response validation
-- **Configuration**: Environment-based configuration management
-
-### Adding New Features
-
-1. Add models in `app/models.py`
-2. Implement service logic in `app/services/`
-3. Create routes in `app/routers/`
-4. Include router in `app/main.py`
-
-## Production Deployment
-
-For production deployment:
-
-1. Set `allow_origins` in CORS middleware to specific domains
-2. Use environment variables for configuration
-3. Set up proper logging and monitoring
-4. Use a production ASGI server like Gunicorn with Uvicorn workers
-5. Implement rate limiting and authentication as needed
-
-```bash
-# Production command example
-gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
-```
-
-## License
-
-This project is licensed under the MIT License. 
+That's it! Simple and functional. 🚀 
