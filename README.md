@@ -4,7 +4,7 @@ A simple FastAPI backend for chatting with Groq's language models with conversat
 
 * Benefits of using Groq API over ChatGPT's built-in shortcut: immediate responses, conversational memory, smarter model, more control over instructions, no need to leave the app open on your phone, won't spam new chat topics on your sidebar in the web. 
 
-* Benefits of calling the shortcut manually over asking Siri to do it: faster speaking rate, more time to formulate your question, less annoying because you don't have to listen to "What's the text?" prompt over and over again. (just slightly more effort to tap)
+* Benefits of calling the shortcut manually over asking Siri to do it: faster speaking rate, more time to formulate your question, less annoying/jarring because you don't have to listen to "What's the text?" prompt over and over again. (just slightly more effort to tap)
 
 ## Features
 
