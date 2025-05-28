@@ -16,9 +16,7 @@ conversation_history: List[Dict[str, str]] = []
 
 # Default settings
 DEFAULT_MODEL = "llama-3.1-8b-instant"
-DEFAULT_MAX_TOKENS = 1024
-DEFAULT_TEMPERATURE = 0.7
-DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant."
+DEFAULT_SYSTEM_PROMPT = "You are a helpful, honest, and knowledgeable assistant. Respond clearly, concisely, and accurately. Prioritize usefulness and truthfulness. Ask clarifying questions if needed."
 
 # Create FastAPI app
 app = FastAPI(
@@ -58,8 +56,6 @@ async def chat(request: ChatRequest):
         response = groq_client.chat.completions.create(
             model=DEFAULT_MODEL,
             messages=messages,
-            max_tokens=DEFAULT_MAX_TOKENS,
-            temperature=DEFAULT_TEMPERATURE
         )
         
         # Get assistant response
