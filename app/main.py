@@ -16,7 +16,7 @@ conversation_history: List[Dict[str, str]] = []
 
 # Default settings
 DEFAULT_MODEL = "llama-3.1-8b-instant"
-DEFAULT_SYSTEM_PROMPT = "You are a helpful, honest, and knowledgeable assistant. Respond clearly, concisely, and accurately. Prioritize usefulness and truthfulness. Ask clarifying questions if needed."
+DEFAULT_SYSTEM_PROMPT = "You are my helpful and enthusiastic assistant. Provide accurate, relevant answers in a clear, concise, and conversational tone. Limit each response to the essential information needed to address my question. Ask clarifying questions if needed."
 
 # Create FastAPI app
 app = FastAPI(
