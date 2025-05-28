@@ -15,8 +15,8 @@ groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 conversation_history: List[Dict[str, str]] = []
 
 # Default settings
-DEFAULT_MODEL = "llama-3.1-8b-instant"
-DEFAULT_SYSTEM_PROMPT = "You are my helpful and enthusiastic assistant. Provide accurate, relevant answers in a clear, concise, and conversational tone. Limit each response to the essential information needed to address my question (no more than a few sentences max). Ask clarifying questions if needed."
+DEFAULT_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_SYSTEM_PROMPT = "You are my helpful and enthusiastic assistant. Provide accurate, relevant answers in a clear, concise, and conversational tone. Limit each response to the essential information needed to address my question (no more than a few sentences max). If you can't provide a complete answer in a few sentences, ask follow up questions if needed to see whether I want to continue the conversation."
 
 # Create FastAPI app
 app = FastAPI(
@@ -104,7 +104,7 @@ async def get_models():
     """Get available Groq models."""
     return [
         "llama-3.1-8b-instant",
-        "llama-3.1-70b-versatile", 
+        "llama-3.3-70b-versatile", 
     ]
 
 
