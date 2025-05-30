@@ -11,6 +11,7 @@ A simple FastAPI backend for chatting with Groq's language models with conversat
 - 🚀 Simple FastAPI app with auto-generated docs
 - 🤖 Direct Groq API integration
 - 💬 Automatic conversation history management
+- 📰 News search with AI summarization.
 - 📝 Clean request/response models
 - 🔧 Environment-based configuration
 
@@ -124,6 +125,44 @@ Get list of available Groq models.
 ]
 ```
 
+### POST `/news-search`
+
+Search for news articles by keyword and get an AI-powered summary. Uses web search to find recent articles and Groq's LLM to generate concise summaries.
+
+**Request:**
+```json
+{
+  "keyword": "artificial intelligence",
+  "max_results": 5
+}
+```
+
+**Response:**
+```json
+{
+  "summary": "AI-generated summary of the news articles about the keyword...",
+  "keyword": "artificial intelligence",
+  "articles": [
+    {
+      "title": "Article title here",
+      "url": "https://example.com/article",
+      "snippet": "Brief preview of the article content...",
+      "source": "example.com"
+    }
+  ],
+  "model": "llama-3.3-70b-versatile",
+  "usage": {
+    "prompt_tokens": 253,
+    "completion_tokens": 124,
+    "total_tokens": 377
+  }
+}
+```
+
+**Parameters:**
+- `keyword` (required): The search term for finding news articles
+- `max_results` (optional): Maximum number of articles to return (default: 5)
+
 ## Usage Examples
 
 ### Python
@@ -169,6 +208,11 @@ curl "http://localhost:8000/history"
 
 # Clear history
 curl -X DELETE "http://localhost:8000/history"
+
+# Search news
+curl -X POST "http://localhost:8000/news-search" \
+  -H "Content-Type: application/json" \
+  -d '{"keyword": "artificial intelligence", "max_results": 3}'
 ```
 
 ### JavaScript
